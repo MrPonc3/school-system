@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!--
+    ============================================================
+     INDEX.HTML — Portal principal del sistema escolar
+    ============================================================
+
+     Esta es la página de entrada al sistema completo.
+     Maneja dos estados visuales:
+       1. LOGIN    — formulario de usuario y contraseña
+       2. HUB      — tarjetas de acceso a cada módulo
+
+     DEPENDENCIAS (en orden de carga):
+       config.js        → configuración central
+       _shared/i18n.js  → sistema de idiomas
+       _shared/auth.js  → manejo de sesión
+
+     MÓDULOS DISPONIBLES:
+     Se muestran según config.js → modulos.
+     Módulos con valor false aparecen como "Coming soon".
+
+     AGREGAR UN MÓDULO NUEVO:
+     1. Actívalo en config.js → modulos
+     2. Agrega su tarjeta en el array MODULOS_CONFIG
+        dentro del script de esta página
+
+     Proyecto: School System
+     Repo:     https://github.com/MrPonc3/school-system
+    ============================================================
+  -->
+
+  <title>School Portal</title>
+  <link rel="stylesheet" href="_shared/style.css">
+
+  <style>
+    /* ── Estilos específicos del portal ── */
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--color-fondo);
+    }
+
+    /* Contenedor central */
+    .portal-wrapper {
+      width: 100%;
+      max-width: 460px;
+      padding: 1rem;
+    }
+
+    /* Card principal */
+    .portal-card {
+      background: var(--color-fondo-tarjeta);
+      border-radius: var(--radio-xl);
+      padding: var(--espacio-2xl);
+      box-shadow: var(--sombra-xl);
+      border: 1px solid var(--color-borde);
+    }
+
+    /* ── Sección login ── */
+    .login-logo {
+      text-align: center;
+      margin-bottom: var(--espacio-xl);
+    }
+
+    .login-logo .logo-icono {
+      width: 72px;
+      height: 72px;
+      background: var(--color-primario);
+      border-radius: var(--radio-xl);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--espacio-md);
+      font-size: 2rem;
+      box-shadow: var(--sombra-lg);
+    }
+
+    .login-logo h1 {
+      font-size: var(--texto-xl);
+      font-weight: 700;
+      color: var(--color-texto);
+      margin-bottom: var(--espacio-xs);
+    }
+
+    .login-logo p {
+      font-size: var(--texto-sm);
+      color: var(--color-texto-suave);
+    }
+
+    /* Selector de idioma en login */
+    .login-idiomas {
+      display: flex;
+      justify-content: center;
+      gap: 0.35rem;
+      margin-bottom: var(--espacio-xl);
+    }
+
+    .login-lang-btn {
+      padding: 0.3rem 0.75rem;
+      border: 1.5px solid var(--color-borde);
+      background: white;
+      border-radius: var(--radio-full);
+      cursor: pointer;
+      font-size: var(--texto-xs);
+      font-weight: 600;
+      color: var(--color-texto-suave);
+      transition: var(--transicion);
+    }
+
+    .login-lang-btn:hover {
+      border-color: var(--color-primario);
+      color: var(--color-primario);
+    }
+
+    .login-lang-btn.active {
+      background: var(--color-primario);
+      border-color: var(--color-primario);
+      color: white;
+    }
+
+    /* Botón principal de login */
+    .btn-login {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--color-primario);
+      color: white;
+      border: none;
+      border-radius: var(--radio-md);
+      font-size: var(--texto-md);
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: var(--espacio-xs);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: var(--transicion);
+      font-family: var(--fuente-base);
+    }
+
+    .btn-login:hover    { background: var(--color-primario-claro); }
+    .btn-login:disabled { background: var(--color-borde); color: var(--color-texto-muy-suave); cursor: not-allowed; }
+
+    /* Mensaje de error */
+    .login-error {
+      background: var(--color-error-fondo);
+      border: 1px solid var(--color-error-borde);
+      border-radius: var(--radio-md);
+      padding: 0.65rem 1rem;
+      color: var(--color-error-texto);
+      font-size: var(--texto-sm);
+      margin-top: var(--espacio-md);
+      display: none;
+    }
+
+    /* ── Sección hub ── */
+    .hub-header {
+      text-align: center;
+      margin-bottom: var(--espacio-xl);
+      padding-bottom: var(--espacio-lg);
+      border-bottom: 1px solid var(--color-borde);
+    }
+
+    .hub-logo-pequeño {
+      width: 44px;
+      height: 44px;
+      background: var(--color-primario);
+      border-radius: var(--radio-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--espacio-sm);
+      font-size: 1.2rem;
+    }
+
+    .hub-bienvenida {
+      font-size: var(--texto-sm);
+      color: var(--color-texto-suave);
+      margin-bottom: 0.2rem;
+    }
+
+    .hub-nombre {
+      font-size: var(--texto-xl);
+      font-weight: 700;
+      color: var(--color-texto);
+      margin-bottom: var(--espacio-sm);
+    }
+
+    /* Grid de módulos */
+    .modulos-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+      margin-bottom: var(--espacio-lg);
+    }
+
+    /* Tarjeta de módulo */
+    .modulo-card {
+      background: var(--color-fondo);
+      border: 1.5px solid var(--color-borde);
+      border-radius: var(--radio-lg);
+      padding: 1.25rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transicion-lenta);
+      text-decoration: none;
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .modulo-card:hover {
+      background: var(--color-fondo-activo);
+      border-color: var(--color-info-borde);
+      transform: translateY(-2px);
+      box-shadow: var(--sombra-md);
+    }
+
+    .modulo-card.inactivo {
+      opacity: 0.55;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .modulo-card.ancho-completo {
+      grid-column: 1 / -1;
+    }
+
+    .modulo-icono {
+      font-size: 1.9rem;
+      margin-bottom: var(--espacio-sm);
+      display: block;
+    }
+
+    .modulo-titulo {
+      font-size: var(--texto-base);
+      font-weight: 600;
+      color: var(--color-texto);
+      margin-bottom: 0.2rem;
+    }
+
+    .modulo-desc {
+      font-size: var(--texto-xs);
+      color: var(--color-texto-suave);
+      line-height: 1.4;
+    }
+
+    .modulo-proximamente {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: var(--color-borde);
+      color: var(--color-texto-suave);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: var(--radio-full);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* Botón cerrar sesión */
+    .hub-cerrar {
+      width: 100%;
+      padding: 0.6rem;
+      background: none;
+      border: 1px solid var(--color-borde);
+      border-radius: var(--radio-md);
+      cursor: pointer;
+      font-size: var(--texto-sm);
+      color: var(--color-texto-suave);
+      transition: var(--transicion);
+      font-family: var(--fuente-base);
+    }
+
+    .hub-cerrar:hover {
+      background: var(--color-fondo-hover);
+      color: var(--color-error-texto);
+      border-color: var(--color-error-borde);
+    }
+
+    /* Pie del portal */
+    .portal-pie {
+      text-align: center;
+      margin-top: var(--espacio-lg);
+      font-size: var(--texto-xs);
+      color: var(--color-texto-muy-suave);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="portal-wrapper">
+    <div class="portal-card">
+
+      <!-- ── SECCIÓN LOGIN ── -->
+      <div id="seccion-login">
+
+        <div class="login-logo">
+          <div class="logo-icono">🏫</div>
+          <h1 data-i18n="portal.titulo">School Portal</h1>
+          <p data-i18n="portal.subtitulo">Academic management system</p>
+        </div>
+
+        <!-- Selector de idioma -->
+        <div class="login-idiomas" id="selector-idioma-login"></div>
+
+        <!-- Formulario -->
+        <div class="form-group">
+          <label class="form-label" for="input-usuario" data-i18n="portal.usuario">Username</label>
+          <input
+            class="form-input"
+            type="text"
+            id="input-usuario"
+            data-i18n-placeholder="portal.usuario"
+            autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="input-password" data-i18n="portal.password">Password</label>
+          <input
+            class="form-input"
+            type="password"
+            id="input-password"
+            data-i18n-placeholder="portal.password">
+        </div>
+
+        <button class="btn-login" id="btn-login" onclick="iniciarSesion()">
+          <div class="spinner" id="spinner-login"></div>
+          <span id="btn-login-texto" data-i18n="portal.ingresar">Sign in</span>
+        </button>
+
+        <div class="login-error" id="login-error"></div>
+
+      </div>
+      <!-- fin sección login -->
+
+      <!-- ── SECCIÓN HUB ── -->
+      <div id="seccion-hub" style="display:none;">
+
+        <div class="hub-header">
+          <div class="hub-logo-pequeño">🏫</div>
+          <p class="hub-bienvenida" data-i18n="portal.bienvenida">Welcome back,</p>
+          <p class="hub-nombre" id="hub-nombre"></p>
+          <span id="hub-badge-rol"></span>
+        </div>
+
+        <!-- Selector de idioma en hub -->
+        <div class="login-idiomas" id="selector-idioma-hub"
+          style="margin-bottom: var(--espacio-lg);"></div>
+
+        <!-- Grid de módulos — se genera dinámicamente -->
+        <div class="modulos-grid" id="modulos-grid"></div>
+
+        <button class="hub-cerrar" onclick="cerrarSesion()">
+          <span data-i18n="portal.cerrarSesion">Sign out</span>
+        </button>
+
+      </div>
+      <!-- fin sección hub -->
+
+    </div>
+
+    <p class="portal-pie">
+      © <span id="pie-año"></span>
+      <span id="pie-escuela"></span> ·
+      v2.0
+    </p>
+  </div>
+
+
+  <!-- Scripts — en este orden exacto -->
+  <script src="config.js"></script>
+  <script src="_shared/i18n.js"></script>
+  <script src="_shared/auth.js"></script>
+
+  <script>
+    /**
+     * ============================================================
+     *  LÓGICA DEL PORTAL
+     * ============================================================
+     *
+     *  AGREGAR UN MÓDULO NUEVO:
+     *  1. Actívalo en config.js → modulos
+     *  2. Agrega su objeto en el array MODULOS_CONFIG abajo
+     *     con sus propiedades: id, icono, tituloKey, descKey,
+     *     url y roles permitidos
+     *
+     *  MODIFICAR ACCESOS POR ROL:
+     *  En cada módulo dentro de MODULOS_CONFIG, edita el
+     *  array 'roles' con los roles que pueden ver ese módulo.
+     * ============================================================
+     */
+
+    // ----------------------------------------------------------
+    //  Configuración de módulos visibles en el hub
+    //  Cada módulo define qué roles pueden acceder a él
+    //  y a qué URL redirige según el rol
+    // ----------------------------------------------------------
+    const MODULOS_CONFIG = [
+      {
+        id:       'evaluacionDocente',
+        icono:    '📝',
+        tituloKey:'modulo.evaluacion.titulo',
+        descKey:  'modulo.evaluacion.desc',
+        anchoCompleto: false,
+        // URL por rol — si un rol no está aquí, no ve el módulo
+        urls: {
+          alumno:   'evaluacion-docente/index.html',
+          maestro:  'evaluacion-docente/resultados/index.html',
+          advisor:  'evaluacion-docente/resultados/index.html',
+          admin:    'evaluacion-docente/resultados/index.html',
+        },
+      },
+      {
+        id:       'intervencion',
+        icono:    '📋',
+        tituloKey:'modulo.intervencion.titulo',
+        descKey:  'modulo.intervencion.desc',
+        anchoCompleto: false,
+        urls: {
+          maestro:  'intervencion/maestro/index.html',
+          advisor:  'intervencion/advisor/index.html',
+          admin:    'intervencion/admin/index.html',
+        },
+      },
+      {
+        id:       'casas',
+        icono:    '🏰',
+        tituloKey:'modulo.casas.titulo',
+        descKey:  'modulo.casas.desc',
+        anchoCompleto: false,
+        urls: {
+          alumno:   'casas/index.html',
+          maestro:  'casas/index.html',
+          encargado:'casas/admin/index.html',
+          advisor:  'casas/index.html',
+          admin:    'casas/admin/index.html',
+        },
+      },
+      {
+        id:       'faltasRetardos',
+        icono:    '📅',
+        tituloKey:'modulo.faltas.titulo',
+        descKey:  'modulo.faltas.desc',
+        anchoCompleto: false,
+        urls: {},   // vacío = próximamente para todos
+      },
+      {
+        id:       'teacherReports',
+        icono:    '📄',
+        tituloKey:'modulo.reportes.titulo',
+        descKey:  'modulo.reportes.desc',
+        anchoCompleto: false,
+        urls: {},
+      },
+    ];
+
+    // ----------------------------------------------------------
+    //  INICIALIZACIÓN
+    // ----------------------------------------------------------
+    document.getElementById('pie-año').textContent    = new Date().getFullYear();
+    document.getElementById('pie-escuela').textContent = CONFIG.escuela.nombre;
+
+    // Construir selectores de idioma
+    construirSelectoresIdioma();
+
+    // Aplicar idioma guardado
+    aplicarIdioma();
+
+    // Si ya hay sesión activa, mostrar hub directamente
+    if (Auth.estaAutenticado()) {
+      const u = Auth.obtenerUsuario();
+      mostrarHub(u.rol, u.nombre);
+    }
+
+    // Permitir Enter para hacer login
+    document.addEventListener('keypress', e => {
+      if (e.key === 'Enter' &&
+          document.getElementById('seccion-login').style.display !== 'none') {
+        iniciarSesion();
+      }
+    });
+
+    // ----------------------------------------------------------
+    //  SELECTOR DE IDIOMA
+    //  Construye los botones de idioma en login y hub
+    // ----------------------------------------------------------
+    function construirSelectoresIdioma() {
+      const ids = ['selector-idioma-login', 'selector-idioma-hub'];
+      const idiomaActivo = localStorage.getItem('idioma') || CONFIG.idiomas.default;
+
+      ids.forEach(id => {
+        const contenedor = document.getElementById(id);
+        if (!contenedor) return;
+        contenedor.innerHTML = CONFIG.idiomas.disponibles.map(codigo => `
+          <button
+            class="login-lang-btn ${codigo === idiomaActivo ? 'active' : ''}"
+            onclick="seleccionarIdioma('${codigo}')"
+            data-lang="${codigo}">
+            ${CONFIG.idiomas.etiquetas[codigo]}
+          </button>`).join('');
+      });
+    }
+
+    function seleccionarIdioma(codigo) {
+      cambiarIdioma(codigo);
+      // Actualizar estado visual de todos los botones
+      document.querySelectorAll('.login-lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === codigo);
+      });
+    }
+
+    // ----------------------------------------------------------
+    //  LOGIN
+    //  Verifica credenciales contra Google Sheets via API
+    // ----------------------------------------------------------
+    async function iniciarSesion() {
+      const usuario  = document.getElementById('input-usuario').value.trim();
+      const password = document.getElementById('input-password').value;
+      const errorDiv = document.getElementById('login-error');
+      const btn      = document.getElementById('btn-login');
+      const spinner  = document.getElementById('spinner-login');
+      const btnTexto = document.getElementById('btn-login-texto');
+
+      // Validar campos vacíos
+      if (!usuario || !password) {
+        errorDiv.textContent  = t('portal.error.campos');
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      // Estado de carga
+      btn.disabled            = true;
+      spinner.classList.add('visible');
+      btnTexto.textContent    = t('portal.verificando');
+      errorDiv.style.display  = 'none';
+
+      try {
+        const res  = await fetch(CONFIG.api.url, {
+          method: 'POST',
+          body:   JSON.stringify({ accion: 'login', usuario, password }),
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+          // Guardar sesión
+          Auth.iniciarSesion(usuario, data.rol, data.nombre);
+
+          // Si es alumno, buscar y guardar su grado
+          // (solo el grado — nunca el nombre, para mantener anonimato)
+          if (data.rol === 'alumno') {
+            const resA = await fetch(CONFIG.api.url, {
+              method: 'POST',
+              body:   JSON.stringify({ accion: 'obtenerAlumnos' }),
+            }).then(r => r.json());
+
+            const alumno = (resA.alumnos || []).find(a =>
+              a.correo_alumno === usuario ||
+              `${a.nombre}.${a.apellido}`.toLowerCase() === usuario.toLowerCase()
+            );
+            Auth.guardarGradoEval(alumno ? alumno.grado : '');
+          }
+
+          mostrarHub(data.rol, data.nombre);
+
+        } else {
+          errorDiv.textContent   = t('portal.error.credenciales');
+          errorDiv.style.display = 'block';
+        }
+
+      } catch(e) {
+        errorDiv.textContent   = t('portal.error.conexion');
+        errorDiv.style.display = 'block';
+      }
+
+      // Restaurar botón
+      btn.disabled = false;
+      spinner.classList.remove('visible');
+      btnTexto.textContent = t('portal.ingresar');
+    }
+
+    // ----------------------------------------------------------
+    //  HUB
+    //  Muestra las tarjetas de módulos según el rol del usuario
+    // ----------------------------------------------------------
+    function mostrarHub(rol, nombre) {
+      // Ocultar login, mostrar hub
+      document.getElementById('seccion-login').style.display = 'none';
+      document.getElementById('seccion-hub').style.display   = 'block';
+
+      // Nombre y badge de rol
+      document.getElementById('hub-nombre').textContent    = nombre;
+      document.getElementById('hub-badge-rol').innerHTML   = Auth.renderizarBadgeRol(rol);
+
+      // Construir tarjetas de módulos
+      const grid = document.getElementById('modulos-grid');
+      grid.innerHTML = '';
+
+      MODULOS_CONFIG.forEach(modulo => {
+        // Verificar si el módulo está activo en config.js
+        const moduloActivo = CONFIG.modulos[modulo.id];
+        // Verificar si este rol tiene acceso al módulo
+        const urlRol       = modulo.urls[rol];
+        // El módulo es visible si está activo Y el rol tiene URL definida
+        const tieneAcceso  = moduloActivo && urlRol;
+        // El módulo aparece como "coming soon" si está inactivo
+        const proximamente = !moduloActivo;
+
+        // Si el módulo está inactivo Y el rol no tiene acceso, no mostrar
+        if (!moduloActivo && !urlRol) return;
+
+        const card = document.createElement('a');
+        card.href      = tieneAcceso ? urlRol : '#';
+        card.className = [
+          'modulo-card',
+          'fade-in',
+          !tieneAcceso  ? 'inactivo'       : '',
+          modulo.anchoCompleto ? 'ancho-completo' : '',
+        ].filter(Boolean).join(' ');
+
+        card.innerHTML = `
+          <span class="modulo-icono">${modulo.icono}</span>
+          <p class="modulo-titulo">${t(modulo.tituloKey)}</p>
+          <p class="modulo-desc">${t(modulo.descKey)}</p>
+          ${proximamente
+            ? `<span class="modulo-proximamente">${t('portal.proximamente')}</span>`
+            : ''}
+        `;
+
+        grid.appendChild(card);
+      });
+
+      // Actualizar idioma en los textos del hub
+      aplicarIdioma();
+    }
+
+    // ----------------------------------------------------------
+    //  CERRAR SESIÓN
+    // ----------------------------------------------------------
+    function cerrarSesion() {
+      sessionStorage.clear();
+      document.getElementById('seccion-hub').style.display   = 'none';
+      document.getElementById('seccion-login').style.display = 'block';
+      document.getElementById('input-usuario').value  = '';
+      document.getElementById('input-password').value = '';
+      aplicarIdioma();
+    }
+
+    // Reaccionar a cambios de idioma para actualizar el hub si está visible
+    window.addEventListener('idiomaChanged', () => {
+      if (Auth.estaAutenticado()) {
+        const u = Auth.obtenerUsuario();
+        mostrarHub(u.rol, u.nombre);
+      }
+    });
+  </script>
+
+</body>
+</html>
