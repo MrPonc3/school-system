@@ -1,0 +1,588 @@
+/**
+ * ============================================================
+ *  STYLE.CSS — Estilos base compartidos
+ * ============================================================
+ *
+ *  Define los estilos fundamentales que todas las páginas
+ *  del sistema heredan. Usa variables CSS para facilitar
+ *  el cambio de tema institucional.
+ *
+ *  CÓMO USAR EN CUALQUIER PÁGINA:
+ *  <link rel="stylesheet" href="../../_shared/style.css">
+ *
+ *  NOTA SOBRE PROFUNDIDAD DE RUTA:
+ *  Páginas en la raíz:       href="_shared/style.css"
+ *  Páginas en una carpeta:   href="../_shared/style.css"
+ *  Páginas en dos carpetas:  href="../../_shared/style.css"
+ *
+ *  ESTRUCTURA:
+ *  1. Reset y base
+ *  2. Variables CSS
+ *  3. Header compartido
+ *  4. Componentes (botones, tarjetas, formularios)
+ *  5. Tabla base
+ *  6. Pestañas
+ *  7. Badges y alertas
+ *  8. Utilidades
+ *  9. Animaciones
+ *  10. Responsive
+ *
+ *  Proyecto: School System
+ *  Repo:     https://github.com/MrPonc3/school-system
+ * ============================================================
+ */
+
+
+/* ── 1. RESET Y BASE ──────────────────────────────────────── */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+/* ── 2. VARIABLES CSS ─────────────────────────────────────── */
+/**
+ * Estas variables definen el tema visual completo.
+ * Para cambiar el tema de una página específica,
+ * sobreescribe las variables en un bloque :root
+ * dentro del <style> de esa página.
+ *
+ * Los colores provisionales se reemplazarán cuando
+ * llegue el documento de identidad visual oficial.
+ */
+
+:root {
+  /* Colores institucionales — PROVISIONALES */
+  --color-primario:         #1a365d;
+  --color-primario-claro:   #2a4a7f;
+  --color-primario-oscuro:  #142a4a;
+  --color-secundario:       #c9a84c;
+  --color-secundario-claro: #e2c56d;
+
+  /* Fondos */
+  --color-fondo:            #f0f4f8;
+  --color-fondo-tarjeta:    #ffffff;
+  --color-fondo-hover:      #f7fafc;
+  --color-fondo-activo:     #ebf8ff;
+
+  /* Textos */
+  --color-texto:            #1a202c;
+  --color-texto-suave:      #718096;
+  --color-texto-muy-suave:  #a0aec0;
+  --color-texto-blanco:     #ffffff;
+
+  /* Bordes */
+  --color-borde:            #e2e8f0;
+  --color-borde-hover:      #cbd5e0;
+
+  /* Semánticos */
+  --color-exito:            #38a169;
+  --color-exito-fondo:      #f0fff4;
+  --color-exito-borde:      #9ae6b4;
+  --color-exito-texto:      #276749;
+
+  --color-error:            #e53e3e;
+  --color-error-fondo:      #fff5f5;
+  --color-error-borde:      #feb2b2;
+  --color-error-texto:      #c53030;
+
+  --color-alerta:           #ed8936;
+  --color-alerta-fondo:     #fffaf0;
+  --color-alerta-borde:     #fbd38d;
+  --color-alerta-texto:     #c05621;
+
+  --color-info:             #3182ce;
+  --color-info-fondo:       #ebf8ff;
+  --color-info-borde:       #90cdf4;
+  --color-info-texto:       #2b6cb0;
+
+  /* Tipografía */
+  --fuente-base:            'Segoe UI', system-ui, sans-serif;
+  --texto-xs:               0.72rem;
+  --texto-sm:               0.82rem;
+  --texto-base:             0.92rem;
+  --texto-md:               1rem;
+  --texto-lg:               1.1rem;
+  --texto-xl:               1.3rem;
+  --texto-2xl:              1.6rem;
+  --texto-3xl:              2rem;
+
+  /* Espaciado */
+  --espacio-xs:             0.25rem;
+  --espacio-sm:             0.5rem;
+  --espacio-md:             1rem;
+  --espacio-lg:             1.5rem;
+  --espacio-xl:             2rem;
+  --espacio-2xl:            2.5rem;
+
+  /* Bordes redondeados */
+  --radio-sm:               6px;
+  --radio-md:               8px;
+  --radio-lg:               12px;
+  --radio-xl:               16px;
+  --radio-full:             9999px;
+
+  /* Sombras */
+  --sombra-sm:              0 1px 4px rgba(0,0,0,0.06);
+  --sombra-md:              0 2px 8px rgba(0,0,0,0.08);
+  --sombra-lg:              0 4px 20px rgba(0,0,0,0.10);
+  --sombra-xl:              0 8px 30px rgba(0,0,0,0.14);
+
+  /* Transiciones */
+  --transicion:             all 0.15s ease;
+  --transicion-lenta:       all 0.3s ease;
+}
+
+
+/* ── 3. HEADER COMPARTIDO ─────────────────────────────────── */
+/**
+ * Header institucional que aparece en todas las páginas
+ * excepto el login del portal.
+ * Usa el color primario institucional como fondo.
+ */
+
+.header-sistema {
+  background: var(--color-primario);
+  color: var(--color-texto-blanco);
+  padding: 0.85rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--sombra-md);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-titulo {
+  font-size: var(--texto-lg);
+  font-weight: 600;
+  color: var(--color-texto-blanco);
+}
+
+.header-subtitulo {
+  font-size: var(--texto-sm);
+  color: rgba(255,255,255,0.7);
+  margin-top: 0.1rem;
+}
+
+.header-izquierda { display: flex; flex-direction: column; }
+
+.header-derecha {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+/* Reloj digital en el header */
+.reloj { text-align: right; line-height: 1.2; }
+.reloj-hora {
+  font-size: var(--texto-xl);
+  font-weight: 700;
+  color: var(--color-texto-blanco);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.reloj-fecha {
+  font-size: var(--texto-xs);
+  color: rgba(255,255,255,0.7);
+}
+
+/* Selector de idioma en el header */
+.selector-idioma {
+  display: flex;
+  gap: 0.15rem;
+  background: rgba(255,255,255,0.12);
+  border-radius: var(--radio-full);
+  padding: 0.2rem;
+}
+
+.lang-btn {
+  padding: 0.2rem 0.55rem;
+  border: none;
+  background: none;
+  color: rgba(255,255,255,0.65);
+  border-radius: var(--radio-full);
+  cursor: pointer;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  transition: var(--transicion);
+  letter-spacing: 0.03em;
+}
+
+.lang-btn:hover:not(.active) { color: var(--color-texto-blanco); }
+.lang-btn.active {
+  background: var(--color-texto-blanco);
+  color: var(--color-primario);
+}
+
+/* Botón cerrar sesión en el header */
+.btn-salir {
+  background: rgba(255,255,255,0.12);
+  color: var(--color-texto-blanco);
+  border: 1px solid rgba(255,255,255,0.25);
+  padding: 0.4rem 1rem;
+  border-radius: var(--radio-md);
+  cursor: pointer;
+  font-size: var(--texto-sm);
+  transition: var(--transicion);
+  font-weight: 500;
+}
+.btn-salir:hover { background: rgba(255,255,255,0.22); }
+
+
+/* ── 4. COMPONENTES ───────────────────────────────────────── */
+
+/* Contenedor principal de página */
+.pagina-contenido {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.pagina-contenido-ancho {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* Tarjeta base */
+.card {
+  background: var(--color-fondo-tarjeta);
+  border-radius: var(--radio-lg);
+  padding: 1.5rem;
+  box-shadow: var(--sombra-md);
+  border: 1px solid var(--color-borde);
+  margin-bottom: 1.5rem;
+}
+
+.card-titulo {
+  font-size: var(--texto-md);
+  font-weight: 600;
+  color: var(--color-texto);
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+/* Botones */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radio-md);
+  font-size: var(--texto-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transicion);
+  border: none;
+  text-decoration: none;
+  font-family: var(--fuente-base);
+  white-space: nowrap;
+}
+
+.btn-primario {
+  background: var(--color-primario);
+  color: var(--color-texto-blanco);
+}
+.btn-primario:hover { background: var(--color-primario-claro); }
+
+.btn-secundario {
+  background: none;
+  color: var(--color-texto);
+  border: 1px solid var(--color-borde);
+}
+.btn-secundario:hover { background: var(--color-fondo-hover); }
+
+.btn-exito {
+  background: var(--color-exito);
+  color: var(--color-texto-blanco);
+}
+.btn-exito:hover { filter: brightness(0.92); }
+
+.btn-error {
+  background: none;
+  color: var(--color-error-texto);
+  border: 1px solid var(--color-error-borde);
+}
+.btn-error:hover { background: var(--color-error-fondo); }
+
+.btn-full { width: 100%; }
+
+.btn:disabled {
+  background: var(--color-borde) !important;
+  color: var(--color-texto-muy-suave) !important;
+  cursor: not-allowed;
+  border-color: transparent !important;
+}
+
+/* Spinner de carga dentro de botones */
+.spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: girar 0.7s linear infinite;
+  display: none;
+  flex-shrink: 0;
+}
+.spinner.visible { display: inline-block; }
+
+/* Formularios */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-texto-suave);
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  font-size: var(--texto-base);
+  outline: none;
+  transition: var(--transicion);
+  font-family: var(--fuente-base);
+  background: white;
+  color: var(--color-texto);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--color-info);
+  box-shadow: 0 0 0 3px rgba(49,130,206,0.1);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--color-texto-muy-suave);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+
+/* ── 5. TABLA BASE ────────────────────────────────────────── */
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--texto-sm);
+}
+
+.tabla th {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  background: var(--color-fondo);
+  color: var(--color-texto-suave);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  border-bottom: 1px solid var(--color-borde);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tabla td {
+  padding: 0.7rem 0.75rem;
+  border-bottom: 1px solid var(--color-borde);
+  color: var(--color-texto);
+  vertical-align: middle;
+}
+
+.tabla tr:last-child td { border-bottom: none; }
+.tabla tr:hover td { background: var(--color-fondo-hover); }
+
+.tabla .vacio {
+  text-align: center;
+  padding: 2.5rem;
+  color: var(--color-texto-muy-suave);
+  font-size: var(--texto-sm);
+}
+
+.tabla .cargando {
+  text-align: center;
+  padding: 2.5rem;
+  color: var(--color-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.tabla-wrapper { overflow-x: auto; }
+
+
+/* ── 6. PESTAÑAS ──────────────────────────────────────────── */
+
+.tabs {
+  display: flex;
+  border-bottom: 2px solid var(--color-borde);
+  margin-bottom: 0;
+}
+
+.tab-btn {
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  font-size: var(--texto-base);
+  color: var(--color-texto-suave);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: var(--transicion);
+  font-weight: 500;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: var(--fuente-base);
+}
+
+.tab-btn:hover  { color: var(--color-info); }
+.tab-btn.active {
+  color: var(--color-info);
+  border-bottom-color: var(--color-info);
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+
+/* ── 7. BADGES Y ALERTAS ──────────────────────────────────── */
+
+/* Badge de rol */
+.badge-rol {
+  display: inline-block;
+  padding: 0.2rem 0.75rem;
+  border-radius: var(--radio-full);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+}
+.badge-rol.admin     { background: #f0fff4; color: #276749; border: 1px solid #9ae6b4; }
+.badge-rol.advisor   { background: #faf5ff; color: #6b46c1; border: 1px solid #d6bcfa; }
+.badge-rol.maestro   { background: #ebf8ff; color: #2b6cb0; border: 1px solid #90cdf4; }
+.badge-rol.encargado { background: #fffaf0; color: #c05621; border: 1px solid #fbd38d; }
+.badge-rol.alumno    { background: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; }
+
+/* Badge de estado académico */
+.badge-estado {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radio-full);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+}
+.badge-estado.peligro      { background: #fffaf0; color: #c05621; border: 1px solid #ed8936; }
+.badge-estado.reprobando   { background: #fff5f5; color: #c53030; border: 1px solid #e53e3e; }
+.badge-estado.felicitacion { background: #f0fff4; color: #276749; border: 1px solid #48bb78; }
+.badge-estado.urgente      { background: #fff5f5; color: #9b2335; border: 1px solid #fc8181; }
+
+/* Alertas de notificación */
+.alerta {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radio-md);
+  font-size: var(--texto-sm);
+  margin-bottom: 1rem;
+  display: none;
+  line-height: 1.5;
+}
+.alerta.visible   { display: block; }
+.alerta.exito     { background: var(--color-exito-fondo);  color: var(--color-exito-texto);  border: 1px solid var(--color-exito-borde); }
+.alerta.error     { background: var(--color-error-fondo);  color: var(--color-error-texto);  border: 1px solid var(--color-error-borde); }
+.alerta.advertencia { background: var(--color-alerta-fondo); color: var(--color-alerta-texto); border: 1px solid var(--color-alerta-borde); }
+.alerta.info      { background: var(--color-info-fondo);   color: var(--color-info-texto);   border: 1px solid var(--color-info-borde); }
+
+
+/* ── 8. UTILIDADES ────────────────────────────────────────── */
+
+.texto-centro   { text-align: center; }
+.texto-derecha  { text-align: right; }
+.texto-suave    { color: var(--color-texto-suave); }
+.texto-pequeño  { font-size: var(--texto-sm); }
+.texto-negrita  { font-weight: 600; }
+.oculto         { display: none !important; }
+.overflow-x     { overflow-x: auto; }
+.w-full         { width: 100%; }
+
+.flex           { display: flex; }
+.flex-center    { display: flex; align-items: center; justify-content: center; }
+.flex-entre     { display: flex; align-items: center; justify-content: space-between; }
+.flex-wrap      { flex-wrap: wrap; }
+.items-center   { align-items: center; }
+
+.gap-xs  { gap: 0.25rem; }
+.gap-sm  { gap: 0.5rem; }
+.gap-md  { gap: 1rem; }
+.gap-lg  { gap: 1.5rem; }
+
+.mt-sm   { margin-top: 0.5rem; }
+.mt-md   { margin-top: 1rem; }
+.mt-lg   { margin-top: 1.5rem; }
+.mb-sm   { margin-bottom: 0.5rem; }
+.mb-md   { margin-bottom: 1rem; }
+.mb-lg   { margin-bottom: 1.5rem; }
+.p-md    { padding: 1rem; }
+
+
+/* ── 9. ANIMACIONES ───────────────────────────────────────── */
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.fade-in  { animation: fadeIn  0.2s ease forwards; }
+.slide-in { animation: slideIn 0.2s ease forwards; }
+
+
+/* ── 10. RESPONSIVE ───────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .header-sistema  { padding: 0.75rem 1rem; }
+  .reloj           { display: none; }
+  .pagina-contenido,
+  .pagina-contenido-ancho { padding: 0 0.75rem; }
+}
+
+@media (max-width: 480px) {
+  .tabs { overflow-x: auto; }
+  .tab-btn { padding: 0.65rem 1rem; font-size: var(--texto-sm); }
+  .btn { padding: 0.55rem 1rem; }
+}
